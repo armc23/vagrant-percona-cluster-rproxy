@@ -15,6 +15,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -yq install percona-xtradb-cluster
 
 apt --fix-broken install -y
 systemctl stop mysql
+touch /run/keepalived.state
 
 cat << EOF > /etc/mysql/mysql.conf.d/mysqld.cnf
 
@@ -116,6 +117,7 @@ STATE=$3
 
 case $STATE in
         "MASTER") /usr/bin/echo "Node is in MASTER state" > /run/keepalived.state
+                  systemctl restart haproxy
                   exit 0
                   ;;
         "BACKUP") /usr/bin/echo "Node is in BACKUP state" > /run/keepalived.state
@@ -129,6 +131,7 @@ case $STATE in
                   ;;
 esac
 EOF
+chmod +x /etc/keepalived/keepalivednotify.sh
 
 
 cat << EOF > /etc/haproxy/haproxy.cfg
